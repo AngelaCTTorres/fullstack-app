@@ -37,4 +37,4 @@ jobs:
       with:
         app-name: ${{ secrets.AZURE_FRONTEND_APP_NAME }}
         publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
-        package: './frontend'
+        package: './frontend/dist'
