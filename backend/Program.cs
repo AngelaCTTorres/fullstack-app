@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-                             ?? new[] { "http://localhost:3000", "http://localhost:5173" };
+                             ?? new[] {"https://app-fullstack-frontend.azurewebsites.net", "http://localhost:3000", "http://localhost:5173",  };
 
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
