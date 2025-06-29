@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'backend/**'
+      - 'backend/**'         # Solo dispara si cambian archivos en la carpeta backend
   workflow_dispatch:
 
 jobs:
@@ -12,32 +12,29 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
+    - name: 📦 Checkout code
       uses: actions/checkout@v4
-    
-    - name: Setup .NET Core
+
+    - name: 🛠 Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-    
-    - name: Restore dependencies
-      run: |
-        cd backend
-        dotnet restore
-    
-    - name: Build application
-      run: |
-        cd backend
-        dotnet build --configuration Release --no-restore
-    
-    - name: Publish application
-      run: |
-        cd backend
-        dotnet publish --configuration Release --no-build --output ./publish
-    
-    - name: Deploy to Azure Web App
+
+    - name: 🧱 Restore dependencies
+      working-directory: ./backend
+      run: dotnet restore
+
+    - name: 🏗 Build application
+      working-directory: ./backend
+      run: dotnet build --configuration Release --no-restore
+
+    - name: 🚀 Publish app for deployment
+      working-directory: ./backend
+      run: dotnet publish --configuration Release --no-build --output ./publish
+
+    - name: 🔄 Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ secrets.AZURE_BACKEND_APP_NAME }}
-        publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
-        package: './backend/publish'
+        app-name: ${{ secrets.AZURE_BACKEND_APP_NAME }}            # 👈 Nombre exacto del App Service
+        publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}  # 👈 Contenido del perfil .PublishSettings
+        package: ./backend/publish
