@@ -43,14 +43,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthorization();
-
-
-app.UseHttpsRedirection();
-
-// Usar CORS - AGREGAR ESTO ANTES DE UseAuthorization
-app.UseCors();
 
 
 // 🔹 Asegurar la creación de base de datos
