@@ -21,13 +21,15 @@ export interface Task {
        private baseUrl: string;
      
        constructor() {
+
+        this.baseUrl = import.meta.env.VITE_API_URL;
          // Configuración dinámica de la URL del backend
          /*this.baseUrl =
            typeof window !== 'undefined'
              ? (window.ENV?.API_URL || 'http://localhost:5234')
              : 'http://localhost:5234';*/ //desbloquear al usar local
              
-              this.baseUrl = import.meta.env.VITE_API_URL;
+              
             
             
        }
