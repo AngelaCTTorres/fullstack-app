@@ -22,7 +22,7 @@ export interface Task {
      
        constructor() {
 
-        this.baseUrl = import.meta.env.VITE_API_URLL;
+        this.baseUrl = import.meta.env.VITE_API_URL;
          // Configuración dinámica de la URL del backend
          /*this.baseUrl =
            typeof window !== 'undefined'

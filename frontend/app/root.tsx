@@ -11,7 +11,7 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 export async function loader({ request }: LoaderFunctionArgs) {
   return {
     ENV: {
-      API_URL: process.env.API_URL || 'https://app-fullstack-backend.azurewebsites.net', //'http://localhost:5234' cambiar a esto para local
+      API_URL: process.env.VITE_API_URL || 'https://app-fullstack-backend.azurewebsites.net', //'http://localhost:5234' cambiar a esto para local
     },
   };
 }
