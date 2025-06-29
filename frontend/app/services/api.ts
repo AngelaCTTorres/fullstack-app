@@ -22,7 +22,7 @@ export interface Task {
      
        constructor() {
 
-        this.baseUrl = import.meta.env.VITE_API_URL;
+        this.baseUrl = import.meta.env.VITE_API_URL || 'https://app-fullstack-backend.azurewebsites.net';
          // Configuración dinámica de la URL del backend
          /*this.baseUrl =
            typeof window !== 'undefined'

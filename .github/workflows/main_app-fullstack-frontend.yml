@@ -30,7 +30,7 @@ jobs:
           npm run build --if-present
           npm run test --if-present
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }} # 👈 AQUI SE AÑADE
+          VITE_API_URL: https://app-fullstack-backend.azurewebsites.net
 
       - name: Crear archivo ZIP de despliegue
         run: zip -r release.zip .
