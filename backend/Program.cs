@@ -15,21 +15,21 @@ builder.Services.AddSwaggerGen();
 // 🔹 Controladores
 builder.Services.AddControllers();
 
-// 🔹 CORS (tomado desde el .env con claves AllowedOrigins__0, __1, etc.)
+// 🔹 CORS — solo dominios confiables
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-            "https://app-fullstack-frontend.azurewebsites.net", // producción
-            "http://localhost:5173",                             // dev (Vite)
-            "http://localhost:3000"                              // dev (CRA o Remix)
+            "https://app-fullstack-frontend.azurewebsites.net", // 👈 Tu frontend en producción
+            "http://localhost:5173",                             // Para desarrollo (Vite)
+            "http://localhost:3000"                              // Para desarrollo (CRA)
         )
-        .AllowAnyHeader()
-        .AllowAnyMethod();
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+        // .AllowCredentials(); // 🔐 Solo si manejas sesiones/cookies cruzadas
     });
 });
-
 
 // 🔹 Entity Framework con cadena desde .env
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -45,11 +45,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+app.UseCors("AllowFrontend"); // 👈 Aplica CORS antes de las rutas
 app.UseAuthorization();
 
-
-// 🔹 Asegurar la creación de base de datos
+// 🔹 Asegurar la creación de la base de datos
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -59,102 +58,60 @@ using (var scope = app.Services.CreateScope())
 // 🔹 Endpoints de la API
 app.MapGet("/api/tasks", async (AppDbContext db) =>
 {
-    try
-    {
-        var tasks = await db.Tasks.OrderByDescending(t => t.CreatedAt).ToListAsync();
-        return Results.Ok(tasks);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error retrieving tasks: {ex.Message}");
-    }
+    var tasks = await db.Tasks.OrderByDescending(t => t.CreatedAt).ToListAsync();
+    return Results.Ok(tasks);
 });
 
 app.MapGet("/api/tasks/stats", async (AppDbContext db) =>
 {
-    try
-    {
-        var total = await db.Tasks.CountAsync();
-        var completed = await db.Tasks.CountAsync(t => t.IsCompleted);
-        var pending = total - completed;
-        return Results.Ok(new { total, completed, pending });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error retrieving stats: {ex.Message}");
-    }
+    var total = await db.Tasks.CountAsync();
+    var completed = await db.Tasks.CountAsync(t => t.IsCompleted);
+    var pending = total - completed;
+    return Results.Ok(new { total, completed, pending });
 });
 
 app.MapGet("/api/tasks/{id}", async (int id, AppDbContext db) =>
 {
-    try
-    {
-        var task = await db.Tasks.FindAsync(id);
-        return task is not null ? Results.Ok(task) : Results.NotFound();
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error retrieving task: {ex.Message}");
-    }
+    var task = await db.Tasks.FindAsync(id);
+    return task is not null ? Results.Ok(task) : Results.NotFound();
 });
 
 app.MapPost("/api/tasks", async (TaskItem task, AppDbContext db) =>
 {
-    try
-    {
-        if (string.IsNullOrWhiteSpace(task.Title))
-            return Results.BadRequest("Title is required");
+    if (string.IsNullOrWhiteSpace(task.Title))
+        return Results.BadRequest("Title is required");
 
-        task.CreatedAt = DateTime.UtcNow;
-        task.IsCompleted = false;
-        db.Tasks.Add(task);
-        await db.SaveChangesAsync();
-        return Results.Created($"/api/tasks/{task.Id}", task);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error creating task: {ex.Message}");
-    }
+    task.CreatedAt = DateTime.UtcNow;
+    task.IsCompleted = false;
+    db.Tasks.Add(task);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/tasks/{task.Id}", task);
 });
 
 app.MapPut("/api/tasks/{id}", async (int id, TaskItem inputTask, AppDbContext db) =>
 {
-    try
-    {
-        var task = await db.Tasks.FindAsync(id);
-        if (task is null) return Results.NotFound();
+    var task = await db.Tasks.FindAsync(id);
+    if (task is null) return Results.NotFound();
 
-        if (string.IsNullOrWhiteSpace(inputTask.Title))
-            return Results.BadRequest("Title is required");
+    if (string.IsNullOrWhiteSpace(inputTask.Title))
+        return Results.BadRequest("Title is required");
 
-        task.Title = inputTask.Title;
-        task.Description = inputTask.Description;
-        task.IsCompleted = inputTask.IsCompleted;
+    task.Title = inputTask.Title;
+    task.Description = inputTask.Description;
+    task.IsCompleted = inputTask.IsCompleted;
 
-        await db.SaveChangesAsync();
-        return Results.Ok(task);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error updating task: {ex.Message}");
-    }
+    await db.SaveChangesAsync();
+    return Results.Ok(task);
 });
 
 app.MapDelete("/api/tasks/{id}", async (int id, AppDbContext db) =>
 {
-    try
-    {
-        var task = await db.Tasks.FindAsync(id);
-        if (task is null) return Results.NotFound();
+    var task = await db.Tasks.FindAsync(id);
+    if (task is null) return Results.NotFound();
 
-        db.Tasks.Remove(task);
-        await db.SaveChangesAsync();
-        return Results.NoContent();
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error deleting task: {ex.Message}");
-    }
+    db.Tasks.Remove(task);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
 });
 
 app.MapGet("/api/health", () => Results.Ok(new
