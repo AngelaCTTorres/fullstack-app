@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-                             ?? new[] {"https://app-fullstack-frontend.azurewebsites.net", "http://localhost:3000", "http://localhost:5173",  };
+                             ?? new[] {"https://app-fullstack-frontend.azurewebsites.net", "http://localhost:3000", "http://localhost:5173" };
 
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
@@ -45,6 +45,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 app.UseAuthorization();
+
+
+app.UseHttpsRedirection();
+
+// Usar CORS - AGREGAR ESTO ANTES DE UseAuthorization
+app.UseCors();
+
 
 // 🔹 Asegurar la creación de base de datos
 using (var scope = app.Services.CreateScope())
