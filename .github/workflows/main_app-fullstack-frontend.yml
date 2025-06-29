@@ -29,6 +29,8 @@ jobs:
           npm install
           npm run build --if-present
           npm run test --if-present
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }} # 👈 AQUI SE AÑADE
 
       - name: Crear archivo ZIP de despliegue
         run: zip -r release.zip .
@@ -61,4 +63,5 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
           package: .
+
 
