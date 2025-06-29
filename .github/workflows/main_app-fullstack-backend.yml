@@ -35,6 +35,6 @@ jobs:
     - name: 🔄 Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ secrets.AZURE_BACKEND_APP_NAME }}            # 👈 Nombre exacto del App Service
+        app-name: 'app-fullstack-backend'           # 👈 Nombre exacto del App Service
         publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}  # 👈 Contenido del perfil .PublishSettings
         package: ./backend/publish
