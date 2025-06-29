@@ -29,8 +29,6 @@ export interface Task {
              ? (window.ENV?.API_URL || 'http://localhost:5234')
              : 'http://localhost:5234';*/ //desbloquear al usar local
              
-              
-            
             
        }
      
