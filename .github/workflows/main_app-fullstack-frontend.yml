@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend  # 👈 ahora todos los pasos usan esta ruta base
     permissions:
       contents: read
 
@@ -16,60 +19,54 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🧭 Mostrar estructura del repositorio
+      - name: Verificar contenido del frontend
         run: |
-          echo "Ruta actual: $(pwd)"
-          echo "Contenido:"
+          echo "📂 Estoy dentro de: $(pwd)"
           ls -la
+          cat package.json || echo "❌ No se encontró package.json"
 
-      - name: 🔍 Buscar package.json en todo el repositorio
-        id: find_path
-        run: |
-          echo "::group::Buscando package.json..."
-          FILE_PATH=$(find . -type f -name "package.json" | head -n 1)
-          echo "📝 Se encontró en: $FILE_PATH"
-          echo "dir_path=$(dirname "$FILE_PATH")" >> $GITHUB_OUTPUT
-          echo "::endgroup::"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
 
-      - name: 📦 Instalar dependencias y compilar app
+      - name: Instalar dependencias, build y test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
-        working-directory: ${{ steps.find_path.outputs.dir_path }}
 
-      - name: 🗜️ Crear archivo ZIP
+      - name: Crear ZIP para despliegue
         run: zip -r release.zip .
-        working-directory: ${{ steps.find_path.outputs.dir_path }}
 
-      - name: 📤 Subir artefacto de despliegue
+      - name: Subir artefacto
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: ${{ steps.find_path.outputs.dir_path }}/release.zip
+          path: ./frontend/release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      contents: read
       id-token: write
+      contents: read
 
     steps:
-      - name: 📥 Descargar artefacto
+      - name: Descargar artefacto
         uses: actions/download-artifact@v4
         with:
           name: node-app
 
-      - name: 📂 Descomprimir artefacto
+      - name: Descomprimir artefacto
         run: unzip release.zip
 
-      - name: 🔐 Iniciar sesión en Azure
+      - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
 
-      - name: 🚀 Desplegar en Azure Web App
+      - name: Desplegar en Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'app-fullstack-frontend'
