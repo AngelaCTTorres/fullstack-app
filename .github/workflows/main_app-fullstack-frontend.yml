@@ -16,7 +16,19 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔎 Verificar ruta actual
+        run: |
+          echo "Directorio actual: $(pwd)"
+          echo "Contenido del workspace:"
+          ls -la
+
+      - name: 🔍 Verificar existencia de frontend/package.json
+        run: |
+          ls -la
+          cat package.json || echo "❌ No se encontró package.json en ./frontend"
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
